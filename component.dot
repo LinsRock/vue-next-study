@@ -1,0 +1,9 @@
+digraph {
+  patch -> processComponent -> mountComponent
+  
+  // 组件渲染
+  mountComponent -> setupComponent -> setupStatefulComponent -> finishComponentSetup -> compile #编译template生成render函数
+  
+  // 设置render的副作用
+  mountComponent -> setupRenderEffect -> new ReactiveEffect() #收集render副作用中响应式依赖 -> componentUpdateFn -> renderComponentRoot -> render #执行render函数，如果其中使用了响应式数据，触发组件instance.ctx代理回调
+}

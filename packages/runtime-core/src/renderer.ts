@@ -302,6 +302,7 @@ export const queuePostRenderEffect = __FEATURE_SUSPENSE__
  * })
  * ```
  */
+// 可创建各个平台的渲染器
 export function createRenderer<
   HostNode = RendererNode,
   HostElement = RendererElement
@@ -365,8 +366,8 @@ function baseCreateRenderer(
   // Note: functions inside this closure should use `const xxx = () => {}`
   // style in order to prevent being inlined by minifiers.
   const patch: PatchFn = (
-    n1,
-    n2,
+    n1, // 旧vnode
+    n2, // 新vnode
     container,
     anchor = null,
     parentComponent = null,
@@ -1167,7 +1168,9 @@ function baseCreateRenderer(
   ) => {
     n2.slotScopeIds = slotScopeIds
     if (n1 == null) {
+      // 组件初始化
       if (n2.shapeFlag & ShapeFlags.COMPONENT_KEPT_ALIVE) {
+        // 是否是keep-alive组件
         ;(parentComponent!.ctx as KeepAliveContext).activate(
           n2,
           container,
@@ -1187,6 +1190,7 @@ function baseCreateRenderer(
         )
       }
     } else {
+      // 组件更新
       updateComponent(n1, n2, optimized)
     }
   }
@@ -1311,8 +1315,10 @@ function baseCreateRenderer(
     isSVG,
     optimized
   ) => {
+    // 组件初始化/更新函数
     const componentUpdateFn = () => {
       if (!instance.isMounted) {
+        // 组件初始化
         let vnodeHook: VNodeHook | null | undefined
         const { el, props } = initialVNode
         const { bm, m, parent } = instance
@@ -1448,6 +1454,7 @@ function baseCreateRenderer(
         // #2458: deference mount-only object parameters to prevent memleaks
         initialVNode = container = anchor = null as any
       } else {
+        // 组件更新
         // updateComponent
         // This is triggered by mutation of component's own state (next: null)
         // OR parent calling processComponent (next: VNode)
@@ -1489,10 +1496,12 @@ function baseCreateRenderer(
         if (__DEV__) {
           startMeasure(instance, `render`)
         }
+        // 生成新的vnode
         const nextTree = renderComponentRoot(instance)
         if (__DEV__) {
           endMeasure(instance, `render`)
         }
+        // 旧的vnode
         const prevTree = instance.subTree
         instance.subTree = nextTree
 
@@ -2316,6 +2325,9 @@ function baseCreateRenderer(
         unmount(container._vnode, null, null, true)
       }
     } else {
+      // container._vnode 
+        //  不存在：初始化
+        //  存在：更新
       patch(container._vnode || null, vnode, container, null, null, null, isSVG)
     }
     flushPostFlushCbs()
@@ -2343,6 +2355,7 @@ function baseCreateRenderer(
     )
   }
 
+  // baseCreateRenderer 返回的renderer
   return {
     render,
     hydrate,

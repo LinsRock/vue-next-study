@@ -18,6 +18,7 @@ type KeyToDepMap = Map<any, Dep>
 const targetMap = new WeakMap<any, KeyToDepMap>()
 
 // The number of effects currently being tracked recursively.
+// 当前被递归跟踪的effect数量
 let effectTrackDepth = 0
 
 export let trackOpBit = 1
@@ -27,6 +28,7 @@ export let trackOpBit = 1
  * This value is chosen to enable modern JS engines to use a SMI on all platforms.
  * When recursion depth is greater, fall back to using a full cleanup.
  */
+// TODO: bitwise track markers、SMI
 const maxMarkerBits = 30
 
 export type EffectScheduler = (...args: any[]) => any
@@ -77,9 +79,12 @@ export class ReactiveEffect<T = any> {
     }
     if (!effectStack.includes(this)) {
       try {
+        // 当前副作用入栈
         effectStack.push((activeEffect = this))
+        // 开启跟踪？
         enableTracking()
 
+        // effect递归深度++，trackOpBit ?
         trackOpBit = 1 << ++effectTrackDepth
 
         if (effectTrackDepth <= maxMarkerBits) {
@@ -87,15 +92,19 @@ export class ReactiveEffect<T = any> {
         } else {
           cleanupEffect(this)
         }
+        
+        // 执行组件更新函数
         return this.fn()
       } finally {
         if (effectTrackDepth <= maxMarkerBits) {
+          // TODO: ???
           finalizeDepMarkers(this)
         }
 
         trackOpBit = 1 << --effectTrackDepth
 
         resetTracking()
+        // 当前副作用出栈
         effectStack.pop()
         const n = effectStack.length
         activeEffect = n > 0 ? effectStack[n - 1] : undefined
@@ -185,6 +194,7 @@ export function resetTracking() {
   shouldTrack = last === undefined ? true : last
 }
 
+// 构建响应式数据和依赖的映射关系 target -> key -> dep
 export function track(target: object, type: TrackOpTypes, key: unknown) {
   if (!isTracking()) {
     return
@@ -215,6 +225,7 @@ export function trackEffects(
 ) {
   let shouldTrack = false
   if (effectTrackDepth <= maxMarkerBits) {
+    // dep当前不被跟踪
     if (!newTracked(dep)) {
       dep.n |= trackOpBit // set newly tracked
       shouldTrack = !wasTracked(dep)
@@ -248,6 +259,7 @@ export function trigger(
   oldValue?: unknown,
   oldTarget?: Map<unknown, unknown> | Set<unknown>
 ) {
+  // 取出target对应的依赖项
   const depsMap = targetMap.get(target)
   if (!depsMap) {
     // never been tracked

@@ -174,6 +174,7 @@ export type CreateAppFunction<HostElement> = (
 
 let uid = 0
 
+// createAppAPI 根据不同的渲染器，创建应用程序实例
 export function createAppAPI<HostElement>(
   render: RootRenderFunction,
   hydrate?: RootHydrateFunction
@@ -189,6 +190,7 @@ export function createAppAPI<HostElement>(
 
     let isMounted = false
 
+    // use、mixin、component、directive 成为实例方法
     const app: App = (context.app = {
       _uid: uid++,
       _component: rootComponent as ConcreteComponent,
@@ -280,6 +282,7 @@ export function createAppAPI<HostElement>(
         isSVG?: boolean
       ): any {
         if (!isMounted) {
+          // 1. 创建虚拟节点
           const vnode = createVNode(
             rootComponent as ConcreteComponent,
             rootProps
@@ -298,6 +301,7 @@ export function createAppAPI<HostElement>(
           if (isHydrate && hydrate) {
             hydrate(vnode as VNode<Node, Element>, rootContainer as any)
           } else {
+            // 2. 将虚拟节点转换为真实dom
             render(vnode, rootContainer, isSVG)
           }
           isMounted = true

@@ -227,6 +227,7 @@ function flushJobs(seen?: CountMap) {
     seen = seen || new Map()
   }
 
+  // a. 执行 清空job前callback
   flushPreFlushCbs(seen)
 
   // Sort queue before flush.
@@ -236,6 +237,8 @@ function flushJobs(seen?: CountMap) {
   //    priority number)
   // 2. If a component is unmounted during a parent component's update,
   //    its update can be skipped.
+
+  // b. job排序(升序)先清空父组件job，再清空子组件job
   queue.sort((a, b) => getId(a) - getId(b))
 
   // conditional usage of checkRecursiveUpdate must be determined out of
@@ -255,6 +258,7 @@ function flushJobs(seen?: CountMap) {
           continue
         }
         // console.log(`running:`, job.id)
+        // c. 安全的清空job
         callWithErrorHandling(job, null, ErrorCodes.SCHEDULER)
       }
     }
@@ -262,6 +266,7 @@ function flushJobs(seen?: CountMap) {
     flushIndex = 0
     queue.length = 0
 
+    // d. 执行清空job后 callback
     flushPostFlushCbs(seen)
 
     isFlushing = false

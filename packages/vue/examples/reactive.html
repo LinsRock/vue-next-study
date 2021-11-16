@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div id="app">
+    <!-- <p>{{list.length}}</p> -->
+  </div>
+
+  <script src="../dist//vue.global.js"></script>
+
+  <script>
+    const {reactive, createApp, ref, defineComponent} = Vue
+
+    const Child = defineComponent({
+      template: '<div>child comp</div>'
+    })
+
+    const Parent = defineComponent({
+      template: `
+        <div>
+          parent comp, count: {{count}}
+          <button @click="handleUpdateCount">update count</button>
+        </div>
+      `,
+      setup() {
+        const count = ref(0);
+
+        const handleUpdateCount = () => {
+          count.value++
+        }
+        
+        return {
+          count,
+          handleUpdateCount
+        }
+      }
+    })
+    
+
+    const app = createApp({
+      components: {
+        Parent
+      },
+      template: '<div><p>App</p> <Parent /></div>'
+    }).mount('#app')
+
+    try {
+      
+    } finally  {
+
+    }
+
+    // console.log(app.$data.info['__v_isReactive'], app.$data.test)
+
+  </script>
+
+</body>
+
+
+</html>

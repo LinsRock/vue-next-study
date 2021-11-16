@@ -576,7 +576,9 @@ export function setupComponent(
 
   const { props, children } = instance.vnode
   const isStateful = isStatefulComponent(instance)
+  // props 初始化
   initProps(instance, props, isStateful, isSSR)
+  // slots 初始化
   initSlots(instance, children)
 
   const setupResult = isStateful
@@ -785,6 +787,7 @@ export function finishComponentSetup(
             extend(finalCompilerOptions.compatConfig, Component.compatConfig)
           }
         }
+        // template组件 编译template生成render函数
         Component.render = compile(template, finalCompilerOptions)
         if (__DEV__) {
           endMeasure(instance, `compile`)
@@ -798,6 +801,7 @@ export function finishComponentSetup(
     // proxy used needs a different `has` handler which is more performant and
     // also only allows a whitelist of globals to fallthrough.
     if (installWithProxy) {
+      // 代理组件render中使用的响应式数据
       installWithProxy(instance)
     }
   }

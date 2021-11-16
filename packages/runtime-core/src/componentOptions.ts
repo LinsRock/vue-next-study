@@ -662,6 +662,7 @@ export function applyOptions(instance: ComponentInternalInstance) {
     if (!isObject(data)) {
       __DEV__ && warn(`data() should return an object.`)
     } else {
+      // options data 响应式 调用的还是 reactive
       instance.data = reactive(data)
       if (__DEV__) {
         for (const key in data) {

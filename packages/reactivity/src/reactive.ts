@@ -84,6 +84,7 @@ export type UnwrapNestedRefs<T> = T extends Ref ? T : UnwrapRefSimple<T>
  * count.value // -> 1
  * ```
  */
+// reactive 响应式入口
 export function reactive<T extends object>(target: T): UnwrapNestedRefs<T>
 export function reactive(target: object) {
   // if trying to observe a readonly proxy, return the readonly version.
@@ -185,6 +186,7 @@ function createReactiveObject(
   collectionHandlers: ProxyHandler<any>,
   proxyMap: WeakMap<Target, any>
 ) {
+  // 1. 不是引用类型，直接返回target
   if (!isObject(target)) {
     if (__DEV__) {
       console.warn(`value cannot be made reactive: ${String(target)}`)
@@ -193,6 +195,7 @@ function createReactiveObject(
   }
   // target is already a Proxy, return it.
   // exception: calling readonly() on a reactive object
+  // 2. target 是响应式数据，直接返回target
   if (
     target[ReactiveFlags.RAW] &&
     !(isReadonly && target[ReactiveFlags.IS_REACTIVE])
@@ -200,15 +203,19 @@ function createReactiveObject(
     return target
   }
   // target already has corresponding Proxy
+  // 3. target 有对应响应式数据，直接返回其proxy数据
   const existingProxy = proxyMap.get(target)
   if (existingProxy) {
     return existingProxy
   }
   // only a whitelist of value types can be observed.
+  // 4. 如果target是不可观察对象（如freeze对象、不可扩展对象、vue内部标记skip对象），直接返回target
   const targetType = getTargetType(target)
   if (targetType === TargetType.INVALID) {
     return target
   }
+
+  // 5. 生成proxy实例，并返回proxy实例
   const proxy = new Proxy(
     target,
     targetType === TargetType.COLLECTION ? collectionHandlers : baseHandlers

@@ -39,6 +39,7 @@ let renderer: Renderer<Element | ShadowRoot> | HydrationRenderer
 
 let enabledHydration = false
 
+// 单例，提示渲染器实例
 function ensureRenderer() {
   return (
     renderer ||
@@ -63,6 +64,7 @@ export const hydrate = ((...args) => {
   ensureHydrationRenderer().hydrate(...args)
 }) as RootHydrateFunction
 
+// 创建vue实例 入口
 export const createApp = ((...args) => {
   const app = ensureRenderer().createApp(...args)
 

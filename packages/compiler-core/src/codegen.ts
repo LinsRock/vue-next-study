@@ -187,6 +187,7 @@ function createCodegenContext(
   return context
 }
 
+// 构建render函数
 export function generate(
   ast: RootNode,
   options: CodegenOptions & {
